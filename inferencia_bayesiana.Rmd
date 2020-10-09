@@ -1,0 +1,82 @@
+---
+output: 
+  html_document:
+    citation_package: natbib
+    keep_tex: true 
+    fig_caption: true
+    latex_engine: pdflatex
+header-includes: 
+- \usepackage[spanish]{babel}
+title: "Un panorama breve y conciso del cómputo Bayesiano: resultados y paradigmas"
+subtitle: "*Estadística Aplicada a la Actuaría*"
+author: 
+- name: Karla Becker Robles
+- name: Daniela Gutiérrez Nahmías 
+- name: José Luis Cordero Rodríguez  
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+geometry: margin=1in
+fontfamily: mathpazo
+fontsize: 11pt
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE,
+                      message=FALSE, warning = FALSE)
+```
+
+Este documento resume los resultados y muestra las conclusiones más importantes del proyecto de inferencia Bayesiana. A continuación presentamos el modelo de *share* *market* que construimos para la empresa que comercializa toallitas sanitarias. A continuación presentamos el análisis exploratorio de datos que hicimos para entender mejor las relaciones entre las distinas empresas 
+```{r}
+library(tidyverse)
+library(pacman)
+library(corrplot)
+library(gridExtra)
+p_load(ggplot2,dplyr,tidyr)
+par(mfrow=c(3,1))
+par(mar=c(1,1,1,1))
+basedat <- as.data.frame(basedat)
+attach(basedat)
+par(mfrow=c(2,1))
+p <- ggplot(basedat, aes(x=share_A)) + geom_histogram() + xlab("Share fabricante A")
+p2 <- ggplot(basedat, aes(x=share_B)) + geom_histogram() + xlab("Share fabricante B")
+grid.arrange(p,p2)
+```
+
+```{r cars}
+por_pais <- group_by(basedat,pais)
+mediaA_pais <-summarize(por_pais, dist_num_A=mean(dist_num_A),agot_num_A=mean(agot_num_A),
+                 ventas_unidades_A=mean(ventas_unidades_A), ppu_A=mean(ppu_A), invetarios_A=mean(inventarios_A),
+                 share_A=mean(share_A),inversion_promos_A=mean(inversion_promos_A),inversion_promos_tv_A=mean(inversion_promos_tv_A))
+mediaA_pais
+```
+
+Aquí resumimos la información para cada país, es decir, la media de cada categoría por país para la empresa A. Lo mismo hicimos para la segunda empresa (B):  
+
+```{r pressure, echo=FALSE}
+mediaB_pais <-summarize(por_pais, dist_num_B=mean(dist_num_B),agot_num_B=mean(agot_num_B),
+                 ventas_unidades_B=mean(ventas_unidades_B), ppu_B=mean(ppu_B), invetarios_B=mean(inventarios_B),
+                 share_B=mean(share_B))
+mediaB_pais
+```
+
+```{r}
+p1 <- lapply(c(8,16),
+function(.x){ggplot(basedat,aes(basedat[,.x], fill = as.factor(pais))) +
+            geom_density(alpha=0.3) + xlab(names(basedat)[.x]) + 
+            theme(legend.position="bottom")})
+grid.arrange(grobs=p1,layout_matrix=rbind(1:2))
+             
+```
+
+```{r}
+
+basedatos_a <- (basedat[-c(1,11:16)])
+ggpairs(basedatos_a,columns=c(5,7),ggplot2::aes(colour=basedatos_a$pais))
+
+
+basedatos_b <- (basedat[-c(1,3:9)])
+ggpairs(basedatos_b,columns=c(6,8),ggplot2::aes(colour=basedatos_b$pais))
+
+
+```
+
